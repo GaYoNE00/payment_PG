@@ -13,8 +13,8 @@ server:
 
 myapp:
   api:
-    payone_apikey: 6224517436887467
-    payone_apisecret: 44GZgmyUk45QFlPC76RWmNmwJdXbAEkcFp7uwY0KVZdgggBlTuegreHztGqqTTEXUIZYWVRX5n2qkY2g
+    payone_apikey: "apikey"
+    payone_apisecret: "apisecret"
 
 
 spring:
@@ -40,9 +40,9 @@ spring:
 #################################
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/payment?serverTimezone=UTC
-    username: root
-    password: '@dudgh0830'
+    url: "dbUrl"
+    username: "id"
+    password: "pw"
 
 #################################
 # JPA Setting
