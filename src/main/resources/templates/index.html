@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>테스트</title>
+    <style>
+        .btn{
+            width: 200px;
+            height: 30px;
+            background-color: beige;
+        }
+
+    </style>
+
+    <script>
+        function test() {
+            var selectElement = document.getElementById("item");
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+            var item_name = selectedOption.text;
+            var money = selectedOption.value;
+            alert("결제 금액 = "+money+"\n 아이템 = "+item_name);
+
+        }
+
+    </script>
+    <!-- jQuery -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
+    <!-- iamport.payment.js -->
+    <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+    <script>
+
+
+        var IMP = window.IMP;
+        IMP.init("imp47148004");
+
+        var today = new Date();
+        var hours = today.getHours(); // 시
+        var minutes = today.getMinutes();  // 분
+        var seconds = today.getSeconds();  // 초
+        var milliseconds = today.getMilliseconds();
+        var makeMerchantUid = hours +  minutes + seconds + milliseconds;
+
+        function btn_pay(){
+            // getter
+            var selectElement = document.getElementById("item");
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+            var item_name = selectedOption.text;
+            var money = selectedOption.value;
+            var buyer_name = "김영호";
+            var buyer_name = "김영호";
+
+
+            alert("결제를 진행합니다.");
+
+            console.log(money);
+
+            IMP.request_pay({
+                //pg : 'html5_inicis.{PG상점아이디}', //테스트 시 html5_inicis.INIpayTest 기재
+                pg : 'html5_inicis.INIpayTest', //테스트 시 html5_inicis.INIpayTest 기재
+                pay_method : 'card',
+                merchant_uid: "order_no_0001"+makeMerchantUid, //상점에서 생성한 고유 주문번호
+                name : item_name,
+                amount : money,
+                buyer_email : 'kymin555@naver.com',
+                buyer_name : '김영호',
+                buyer_tel : '010-2655-0032',   //필수 파라미터 입니다.
+                buyer_addr : '인천광역시 미출홀구 학익동',
+                buyer_postcode : '123-456',
+                m_redirect_url : '{모바일에서 결제 완료 후 리디렉션 될 URL}',
+                escrow : true, //에스크로 결제인 경우 설정
+                vbank_due : 'YYYYMMDD',
+                bypass : {
+                    acceptmethod : "noeasypay", // 간편결제 버튼을 통합결제창에서 제외(PC)
+                    P_RESERVED: "noeasypay=Y",  // 간편결제 버튼을 통합결제창에서 제외(모바일)
+                    acceptmethod: 'cardpoint',  // 카드포인트 사용시 설정(PC)
+                    P_RESERVED : 'cp_yn=Y'     // 카드포인트 사용시 설정(모바일)
+                },
+                period : {
+                    from : "20200101", //YYYYMMDD
+                    to : "20201231"   //YYYYMMDD
+                }
+            }, function (rsp) {
+                if (rsp.success) {
+                    alert("일단 결제는 완료");
+                    $.ajax({
+                        type:"POST",
+                        url:"/validate/"+rsp.imp_uid
+                    }).done(function (data){
+                        if(rsp.paid_amount == data.response.amount){
+                            var msg = '정보 확인\n';
+                            msg += 'rsp.amount : ' + money;
+                            msg += '\n rsp.item_name: ' + item_name;
+                            msg += '\n rsp.merchant_uid: ' + rsp.merchant_uid;
+                            msg += '\n rsp.buyer: ' + buyer_name;
+
+                            alert("결제 및 검증 완료 \n" + msg)
+
+                            $.ajax({
+                                type: "POST",
+                                url: "/db", //충전 금액값을 보낼 url 설정
+                                contentType: "application/json",
+                                data:JSON.stringify({
+                                    "amount" : money,
+                                    "item_name" : item_name,
+                                    "merchant_uid" : rsp.merchant_uid,
+                                    "buyer" : buyer_name
+                                }),
+                                success: function(response){
+                                    alert("DB저장완료");
+                                    document.location.href="/after"; //alert창 확인 후 이동할 url 설정
+                                },
+                                error: function (){
+                                    alert("DB저장실패");
+                                }
+                            });
+
+                        }else{
+                            var msg = '검증실패\n';
+                            msg += 'rsp.amount : ' + rsp.amount;
+                            msg += '\n data.response.amount: ' + data.response.amount;
+                            alert(msg);
+                        }
+
+                    })
+
+                } else {
+                    var msg = '결제에 실패하였습니다.';
+                    msg += '에러내용 : ' + rsp.error_msg;
+                    alert(msg);
+                    document.location.href="/fail"; //alert창 확인 후 이동할 url 설정
+                }
+            });
+        };
+    </script>
+</head>
+<body>
+<h1>결제를 해볼까요?</h1>
+
+<select name="item" id="item">
+    <option value="10000">아이폰</option>
+    <option value="8000">갤럭시</option>
+    <option value="100">베가 아이언</option>
+</select><br>
+
+<button class="btn" onclick="test()">테스트 버튼</button><br><br>
+<button class="btn" id="btn_pay" onclick="btn_pay()">테스트 결제</button>
+</body>
+</html>

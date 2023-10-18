@@ -1,0 +1,81 @@
+
+
+#################################
+# Port Number
+#################################
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+myapp:
+  api:
+    payone_apikey: 6224517436887467
+    payone_apisecret: 44GZgmyUk45QFlPC76RWmNmwJdXbAEkcFp7uwY0KVZdgggBlTuegreHztGqqTTEXUIZYWVRX5n2qkY2g
+
+
+spring:
+  banner:
+    location: banner/banner.txt
+  
+  application:
+    name: payment_PG
+
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+
+
+#################################
+# MySQL Setting
+#################################
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/payment?serverTimezone=UTC
+    username: root
+    password: '@dudgh0830'
+
+#################################
+# JPA Setting
+#################################
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Seoul
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+#json관련 설정
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+      
+
+        
+###############################
+# Log info
+###############################
+logging:
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql: trace
